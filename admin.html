@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Administração · Ziran Desk</title>
+  <link rel="stylesheet" href="css/styles.css?v=3"/>
+</head>
+<body>
+<button class="hamburger" id="menuBtn">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/ziran-logo.jpg" alt="Ziran Desk"/>
+      <div><div class="sidebar-brand-name">Ziran Desk</div><div class="sidebar-brand-sub">Service desk corporativo</div></div>
+    </div>
+    <span class="nav-label">Principal</span>
+    <a href="dashboard.html" class="nav-link"><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="tickets.html"   class="nav-link"><span class="nav-icon">🎫</span> Chamados</a>
+    <span class="nav-label">Administração</span>
+    <a href="admin.html" class="nav-link active"><span class="nav-icon">⚙️</span> Configurações</a>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-pill-name" id="welcomeUser">—</div><div class="user-pill-role" id="welcomeMeta">—</div></div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">↪ Sair da conta</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="page-header fade-up">
+      <div><h1>Administração</h1><p>Usuários, categorias e aprovação de cadastros.</p></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs fade-up fade-up-1">
+      <div class="tab active" data-tab="usuarios">👥 Usuários</div>
+      <div class="tab" data-tab="categorias">🏷️ Categorias</div>
+      <div class="tab" data-tab="registros" id="tabRegistros">🔔 Cadastros</div>
+    </div>
+
+    <!-- Usuários -->
+    <div id="tab-usuarios" class="fade-up fade-up-2">
+      <div class="grid-two">
+        <div class="card">
+          <div class="section-row"><h3 id="userFormTitle">Novo usuário</h3></div>
+          <form id="userForm" class="form-stack" novalidate>
+            <input type="hidden" id="userId"/>
+            <div class="form-row">
+              <label>Nome <input id="uNome" name="nome" placeholder="Nome completo" required/></label>
+              <label>E-mail <input id="uEmail" name="email" type="email" placeholder="email@empresa.com" required/></label>
+            </div>
+            <div class="form-row">
+              <label>Setor <input id="uSetor" name="setor" placeholder="Ex: TI, Financeiro..."/></label>
+              <label>Perfil
+                <select id="uPerfil" name="perfil">
+                  <option value="solicitante">👤 Solicitante</option>
+                  <option value="tecnico">🔧 Técnico</option>
+                  <option value="gestor">👁️ Gestor</option>
+                  <option value="admin">🛡️ Admin</option>
+                </select>
+              </label>
+            </div>
+            <div class="form-row">
+              <label>Status
+                <select id="uStatus" name="status">
+                  <option value="ativo">✅ Ativo</option>
+                  <option value="inativo">🚫 Inativo</option>
+                </select>
+              </label>
+              <label>Senha <input id="uSenha" name="senha" type="password" placeholder="Mín. 6 caracteres"/></label>
+            </div>
+            <p style="font-size:12px;color:var(--muted);">Deixe a senha em branco ao editar para mantê-la.</p>
+            <div style="display:flex;gap:10px;">
+              <button type="submit" class="btn primary" id="userSubmit">Salvar usuário</button>
+              <button type="button" class="btn ghost"   id="userReset"  style="display:none;">Cancelar edição</button>
+            </div>
+            <p id="userError" class="error-text"></p>
+          </form>
+        </div>
+
+        <div class="card">
+          <div class="section-row">
+            <div><h3>Usuários cadastrados</h3></div>
+            <button class="btn secondary sm" onclick="loadUsers()">↻</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Usuário</th><th>Setor</th><th>Perfil</th><th>Status</th><th></th></tr></thead>
+              <tbody id="usersBody"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted);">Carregando...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Categorias -->
+    <div id="tab-categorias" style="display:none;" class="fade-up">
+      <div class="grid-two">
+        <div class="card">
+          <div class="section-row"><h3>Nova categoria</h3></div>
+          <form id="categoryForm" class="form-stack" novalidate>
+            <input type="hidden" id="catId"/>
+            <label>Nome <input id="catNome" name="nome_categoria" placeholder="Ex: Hardware, Software..." required/></label>
+            <label>Status
+              <select id="catAtivo">
+                <option value="true">✅ Ativo</option>
+                <option value="false">🚫 Inativo</option>
+              </select>
+            </label>
+            <div style="display:flex;gap:10px;">
+              <button type="submit" class="btn primary" id="catSubmit">Salvar</button>
+              <button type="button" class="btn ghost"   id="catReset" style="display:none;">Cancelar</button>
+            </div>
+            <p id="catError" class="error-text"></p>
+          </form>
+        </div>
+        <div class="card">
+          <div class="section-row">
+            <div><h3>Categorias cadastradas</h3></div>
+            <button class="btn secondary sm" onclick="loadCategories()">↻</button>
+          </div>
+          <div id="categoriesList" class="simple-list"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cadastros Pendentes -->
+    <div id="tab-registros" style="display:none;" class="fade-up">
+      <div class="page-header" style="margin-bottom:20px;">
+        <div>
+          <h1>🔔 Cadastros Pendentes</h1>
+          <p>Aprove ou rejeite solicitações de acesso ao sistema.</p>
+        </div>
+        <button class="btn secondary sm" onclick="loadRegistrations()">↻ Atualizar</button>
+      </div>
+      <div class="card" style="padding:0;overflow:hidden;">
+        <table class="table">
+          <thead>
+            <tr><th>Nome</th><th>E-mail</th><th>Setor</th><th>Solicitado em</th><th>Status</th><th>Ações</th></tr>
+          </thead>
+          <tbody id="registrationsBody">
+            <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted);">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/config.js?v=3"></script>
+<script src="js/api.js?v=3"></script>
+<script src="js/auth.js?v=3"></script>
+<script src="js/admin.js?v=3"></script>
+</body>
+</html>

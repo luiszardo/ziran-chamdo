@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Solicitar Acesso · Ziran Desk</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="auth-body">
+<div class="auth-shell">
+  <section class="auth-brand">
+    <img src="assets/ziran-logo.jpg" alt="Ziran" class="auth-brand-logo"/>
+    <div class="auth-brand-content">
+      <span class="auth-brand-eyebrow">Primeiro acesso</span>
+      <h1 class="auth-brand-title">Solicite seu<br/><span>acesso</span></h1>
+      <p class="auth-brand-sub">Preencha o formulário e aguarde a aprovação do administrador de TI.</p>
+      <div class="auth-brand-feats">
+        <div class="auth-feat">Solicitação enviada em segundos</div>
+        <div class="auth-feat">Você define seu próprio e-mail e senha</div>
+        <div class="auth-feat">Admin aprova ou rejeita o acesso</div>
+        <div class="auth-feat">Acesso liberado imediatamente após aprovação</div>
+      </div>
+    </div>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-card-logo">
+        <img src="assets/ziran-logo.jpg" alt="Ziran"/>
+        <span>Ziran Desk</span>
+      </div>
+
+      <!-- Success -->
+      <div id="successState" style="display:none;text-align:center;padding:20px 0;">
+        <div style="font-size:48px;margin-bottom:16px;">✅</div>
+        <h2 style="margin-bottom:8px;">Solicitação enviada!</h2>
+        <p style="color:var(--muted);margin-bottom:24px;">O administrador irá liberar seu acesso em breve.</p>
+        <a href="login.html" class="btn primary" style="width:100%;justify-content:center;">Voltar para o login</a>
+      </div>
+
+      <!-- Form -->
+      <div id="formState">
+        <div><h2>Solicitar acesso</h2><p>Preencha seus dados para solicitar acesso ao portal.</p></div>
+        <div id="registerError" class="error-text" style="padding:10px 14px;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;display:none;"></div>
+        <form id="registerForm" class="form-stack" novalidate>
+          <label>Nome completo<input name="nome" type="text" placeholder="João da Silva" required/></label>
+          <label>E-mail corporativo<input name="email" type="email" placeholder="voce@empresa.com" required/></label>
+          <label>Setor / Departamento<input name="setor" type="text" placeholder="Ex: Financeiro, RH, TI..." required/></label>
+          <label>Senha
+            <div style="position:relative;">
+              <input name="password" id="pwdInput" type="password" placeholder="Mínimo 6 caracteres" required style="padding-right:44px;"/>
+              <button type="button" id="togglePwd" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--muted);">👁️</button>
+            </div>
+          </label>
+          <label>Confirmar senha<input name="password2" id="pwd2Input" type="password" placeholder="Repita a senha" required/></label>
+          <button type="submit" class="btn primary" style="width:100%;padding:13px;font-size:15px;">Enviar solicitação</button>
+        </form>
+        <p style="text-align:center;font-size:13px;color:var(--muted-2);">Já tem acesso? <a href="login.html" style="color:var(--red);font-weight:700;">Entrar →</a></p>
+      </div>
+    </div>
+  </section>
+</div>
+<script src="js/config.js"></script><script src="js/api.js"></script><script src="js/auth.js"></script>
+<script>
+  document.getElementById('togglePwd').addEventListener('click',function(){const i=document.getElementById('pwdInput');i.type=i.type==='password'?'text':'password';this.textContent=i.type==='password'?'👁️':'🙈';});
+  new MutationObserver(()=>{const e=document.getElementById('registerError');if(e)e.style.display=e.textContent.trim()?'block':'none';}).observe(document.getElementById('registerError'),{childList:true,characterData:true,subtree:true});
+</script>
+</body>
+</html>

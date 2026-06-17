@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Dashboard · Ziran Desk</title>
+  <link rel="stylesheet" href="css/styles.css?v=3"/>
+</head>
+<body>
+<button class="hamburger" id="menuBtn">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/ziran-logo.jpg" alt="Ziran Desk"/>
+      <div><div class="sidebar-brand-name">Ziran Desk</div><div class="sidebar-brand-sub">Service desk corporativo</div></div>
+    </div>
+    <span class="nav-label">Principal</span>
+    <a href="dashboard.html" class="nav-link active" data-staff-only><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="tickets.html"   class="nav-link"><span class="nav-icon">🎫</span> Chamados</a>
+    <span class="nav-label" data-admin-only>Administração</span>
+    <a href="admin.html" class="nav-link" data-admin-only><span class="nav-icon">⚙️</span> Configurações</a>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-pill-name" id="welcomeUser">—</div><div class="user-pill-role" id="welcomeMeta">—</div></div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">↪ Sair da conta</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+
+    <!-- Gestor notice -->
+    <div class="readonly-notice gestor-notice" style="display:none;">
+      👁️ Você está no perfil <strong>Gestor</strong> — visualização completa, sem edição.
+    </div>
+
+    <!-- Userbar -->
+    <div class="userbar fade-up">
+      <div class="userbar-left">
+        <div class="userbar-name">Dashboard</div>
+        <div class="userbar-meta" id="dashDate">—</div>
+      </div>
+      <div class="userbar-right">
+        <button class="btn secondary sm" onclick="loadDashboard()">↻ Atualizar</button>
+        <a href="tickets.html?new=1" class="btn primary sm">+ Novo Chamado</a>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid fade-up fade-up-1">
+      <div class="stat-card" id="statTotal">   <div class="stat-card-bar stat-bar"></div><div class="label">Total de chamados</div>   <div class="stat-value">—</div></div>
+      <div class="stat-card" id="statAbertos">  <div class="stat-card-bar stat-bar"></div><div class="label">Abertos</div>             <div class="stat-value">—</div></div>
+      <div class="stat-card" id="statAtendimento"><div class="stat-card-bar stat-bar"></div><div class="label">Em atendimento</div>    <div class="stat-value">—</div></div>
+      <div class="stat-card" id="statResolvidos"><div class="stat-card-bar stat-bar"></div><div class="label">Resolvidos este mês</div><div class="stat-value">—</div></div>
+      <div class="stat-card" id="statAguardando"><div class="stat-card-bar stat-bar"></div><div class="label">Aguardando usuário</div> <div class="stat-value">—</div></div>
+      <div class="stat-card" id="statTempo">    <div class="stat-card-bar stat-bar"></div><div class="label">Tempo médio resolução</div><div class="stat-value">—</div></div>
+    </div>
+
+    <!-- Sector Analysis — DESTAQUE -->
+    <div class="card fade-up fade-up-2" style="border-left:4px solid var(--red);">
+      <div class="section-row">
+        <div>
+          <h3>🏢 Análise por Setor</h3>
+          <p>Setores com maior volume de problemas — identifique onde focar atenção</p>
+        </div>
+      </div>
+      <div id="chartSetores" class="setor-bar-wrap">
+        <div class="skel" style="height:32px;border-radius:8px;"></div>
+        <div class="skel" style="height:32px;border-radius:8px;"></div>
+        <div class="skel" style="height:32px;border-radius:8px;"></div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="grid-two fade-up fade-up-3">
+      <div class="card">
+        <div class="section-row"><div><h3>Por Categoria</h3><p>Distribuição de chamados</p></div></div>
+        <div id="chartCategorias" class="setor-bar-wrap"></div>
+      </div>
+      <div class="card">
+        <div class="section-row"><div><h3>Por Prioridade</h3><p>Proporção de urgência</p></div></div>
+        <div id="chartPrioridades" class="setor-bar-wrap"></div>
+      </div>
+    </div>
+
+    <!-- Trend + Technician -->
+    <div class="grid-two fade-up fade-up-4">
+      <div class="card">
+        <div class="section-row"><div><h3>Tendência Mensal</h3><p>Últimos 6 meses</p></div></div>
+        <div id="chartTendencia"></div>
+      </div>
+      <div class="card">
+        <div class="section-row"><div><h3>Por Técnico</h3><p>Chamados em atendimento</p></div></div>
+        <div id="chartTecnicos" class="setor-bar-wrap"></div>
+      </div>
+    </div>
+
+    <!-- Status + Recent -->
+    <div class="grid-two fade-up">
+      <div class="card">
+        <div class="section-row"><h3>Por Status</h3></div>
+        <div id="statusSummary" class="simple-list"></div>
+      </div>
+      <div class="card">
+        <div class="section-row"><h3>Chamados Recentes</h3><a href="tickets.html" class="btn secondary sm">Ver todos →</a></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Protocolo</th><th>Título</th><th>Status</th><th>Prioridade</th><th>Setor</th><th>Abertura</th></tr></thead>
+            <tbody id="recentBody"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted);">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/config.js?v=3"></script><script src="js/api.js?v=3"></script><script src="js/auth.js?v=3"></script><script src="js/dashboard.js?v=3"></script>
+</body>
+</html>

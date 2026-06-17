@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Ziran Desk · Login</title>
+  <link rel="stylesheet" href="css/styles.css"/>
+</head>
+<body class="auth-body">
+<div class="auth-shell">
+  <section class="auth-brand">
+    <img src="assets/ziran-logo.jpg" alt="Ziran" class="auth-brand-logo"/>
+    <div class="auth-brand-content">
+      <span class="auth-brand-eyebrow">Service Desk Corporativo</span>
+      <h1 class="auth-brand-title">Suporte de TI<br/>sem <span>fricção</span></h1>
+      <p class="auth-brand-sub">Centralize chamados, controle SLAs e entregue atendimento técnico de excelência.</p>
+      <div class="auth-brand-feats">
+        <div class="auth-feat">Abertura de chamados em segundos</div>
+        <div class="auth-feat">Dashboard com análise por setor</div>
+        <div class="auth-feat">Controle de SLA por prioridade</div>
+        <div class="auth-feat">Perfis: Admin, Gestor, Técnico, Solicitante</div>
+      </div>
+    </div>
+  </section>
+  <section class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-card-logo">
+        <img src="assets/ziran-logo.jpg" alt="Ziran"/>
+        <span>Ziran Desk</span>
+      </div>
+      <div><h2>Bem-vindo de volta</h2><p>Entre com suas credenciais corporativas.</p></div>
+      <div id="loginError" style="display:none;padding:12px 16px;background:#fff1f2;border:1px solid #fecdd3;border-radius:10px;color:#b91c1c;font-size:14px;font-weight:600;"></div>
+      <div class="form-stack">
+        <label>E-mail
+          <input id="loginEmail" type="email" placeholder="voce@empresa.com" autocomplete="username"/>
+        </label>
+        <label>Senha
+          <div style="position:relative;">
+            <input id="loginPassword" type="password" placeholder="••••••••" autocomplete="current-password" style="padding-right:44px;"/>
+            <button type="button" id="togglePwd" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:#9ca3af;">👁️</button>
+          </div>
+        </label>
+        <button type="button" id="loginBtn" class="btn primary" style="width:100%;padding:13px;font-size:15px;">Entrar</button>
+      </div>
+      <p style="text-align:center;font-size:13px;color:#9ca3af;">
+        Não tem acesso? <a href="register.html" style="color:#d5111f;font-weight:700;">Solicitar cadastro →</a>
+      </p>
+      <p style="text-align:center;font-size:12px;color:#9ca3af;">Ziran Desk © <span id="yr"></span></p>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  // Toggle password visibility
+  document.getElementById('togglePwd').addEventListener('click', function() {
+    const i = document.getElementById('loginPassword');
+    i.type = i.type === 'password' ? 'text' : 'password';
+    this.textContent = i.type === 'password' ? '👁️' : '🙈';
+  });
+
+  // Allow pressing Enter
+  document.getElementById('loginPassword').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+  document.getElementById('loginEmail').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+
+  async function doLogin() {
+    const email    = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const errEl    = document.getElementById('loginError');
+    const btn      = document.getElementById('loginBtn');
+
+    errEl.style.display = 'none';
+
+    if (!email || !password) {
+      showError('Preencha e-mail e senha.');
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = '⏳ Entrando...';
+
+    try {
+      const resp = await fetch('/api', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'auth.login', email, senha: password }),
+      });
+
+      const data = await resp.json();
+
+      if (!data.ok) {
+        showError(data.error || 'Credenciais inválidas.');
+        return;
+      }
+
+      // Save session
+      localStorage.setItem('zd_v3_session', JSON.stringify({
+        user:  data.user,
+        token: data.token,
+      }));
+
+      // Redirect by role
+      const perfil = data.user?.perfil || 'solicitante';
+      if (perfil === 'solicitante') {
+        location.href = '/tickets.html';
+      } else {
+        location.href = '/dashboard.html';
+      }
+
+    } catch(e) {
+      showError('Erro de conexão. Tente novamente.');
+    } finally {
+      btn.disabled    = false;
+      btn.textContent = 'Entrar';
+    }
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('loginError');
+    el.textContent    = msg;
+    el.style.display  = 'block';
+  }
+
+  // If already logged in, redirect
+  try {
+    const s = JSON.parse(localStorage.getItem('zd_v3_session') || 'null');
+    if (s?.user?.id && s?.token) {
+      location.replace(s.user.perfil === 'solicitante' ? '/tickets.html' : '/dashboard.html');
+    }
+  } catch(e) {}
+</script>
+</body>
+</html>

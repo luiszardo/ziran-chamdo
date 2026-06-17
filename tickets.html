@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Chamados · Ziran Desk</title>
+  <link rel="stylesheet" href="css/styles.css?v=3"/>
+</head>
+<body>
+<button class="hamburger" id="menuBtn">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/ziran-logo.jpg" alt="Ziran Desk"/>
+      <div><div class="sidebar-brand-name">Ziran Desk</div><div class="sidebar-brand-sub">Service desk corporativo</div></div>
+    </div>
+    <span class="nav-label">Principal</span>
+    <a href="dashboard.html" class="nav-link" data-staff-only><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="tickets.html"   class="nav-link active"><span class="nav-icon">🎫</span> Chamados</a>
+    <span class="nav-label" data-admin-only>Administração</span>
+    <a href="admin.html" class="nav-link" data-admin-only><span class="nav-icon">⚙️</span> Configurações</a>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-pill-name" id="welcomeUser">—</div><div class="user-pill-role" id="welcomeMeta">—</div></div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">↪ Sair da conta</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="readonly-notice gestor-notice" style="display:none;">
+      👁️ Você está no perfil <strong>Gestor</strong> — visualização completa. Para abrir chamados, use o botão abaixo.
+    </div>
+
+    <div class="page-header fade-up">
+      <div>
+        <h1 id="pgTitle">Chamados</h1>
+        <p>Gerencie a fila de atendimento</p>
+      </div>
+      <div class="page-header-actions">
+        <button class="btn secondary sm" onclick="loadTickets()">↻</button>
+        <button class="btn primary" id="btnNewTicket">+ Novo Chamado</button>
+      </div>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-grid fade-up fade-up-1" id="overviewGrid"></div>
+
+    <!-- Filters (staff only) -->
+    <div id="filtersSection" class="filters-bar fade-up fade-up-2">
+      <div class="filter-group">
+        <span class="filter-label">Status</span>
+        <select id="fStatus" class="form-control" style="min-width:160px;font-size:13px;padding:9px 12px;">
+          <option value="">Todos os status</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Prioridade</span>
+        <select id="fPriority" class="form-control" style="min-width:130px;font-size:13px;padding:9px 12px;">
+          <option value="">Todas</option>
+          <option>Baixa</option><option>Média</option><option>Alta</option><option>Crítica</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <span class="filter-label">Setor</span>
+        <input id="fSetor" type="text" class="form-control" placeholder="Ex: Financeiro" style="min-width:130px;font-size:13px;padding:9px 12px;"/>
+      </div>
+      <div class="filter-group grow">
+        <span class="filter-label">Busca</span>
+        <input id="fSearch" type="search" class="form-control" placeholder="Protocolo ou título..." style="font-size:13px;padding:9px 12px;"/>
+      </div>
+      <div class="filter-actions">
+        <button class="btn primary sm" id="btnFilter">Filtrar</button>
+        <button class="btn ghost sm"   onclick="clearFilters()">Limpar</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card fade-up fade-up-3" style="padding:0;overflow:hidden;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Protocolo</th>
+              <th>Título</th>
+              <th>Status</th>
+              <th>Prioridade</th>
+              <th class="col-staff">Solicitante</th>
+              <th class="col-staff">Setor</th>
+              <th class="col-staff">Responsável</th>
+              <th>Abertura</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="ticketsBody">
+            <tr><td colspan="9" style="text-align:center;padding:40px;color:var(--muted);">Carregando...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- New Ticket Modal -->
+<div class="modal" id="ticketModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3>✏️ Novo Chamado</h3>
+      <button class="modal-close" id="btnCloseModal">×</button>
+    </div>
+    <form id="ticketForm" novalidate>
+      <div class="form-grid">
+        <label class="full">Título <input name="titulo" placeholder="Descreva o problema brevemente..." required/></label>
+        <label>Categoria
+          <select name="categoria" id="ticketCategoria" required>
+            <option value="">Selecione...</option>
+          </select>
+        </label>
+        <label>Subcategoria
+          <select name="subcategoria" id="ticketSubcategoria">
+            <option value="">Nenhuma (opcional)</option>
+          </select>
+        </label>
+        <label>Prioridade
+          <select name="prioridade">
+            <option>Baixa</option><option selected>Média</option><option>Alta</option><option>Crítica</option>
+          </select>
+        </label>
+        <label>Setor / Departamento
+          <input name="setor" id="ticketSetor" type="text" placeholder="Seu setor"/>
+        </label>
+        <label class="full">Descrição detalhada
+          <textarea name="descricao" rows="5" placeholder="Descreva o problema com detalhes..." required></textarea>
+        </label>
+        <label class="full">Anexo (opcional)
+          <input type="file" id="ticketFile" accept=".png,.jpg,.jpeg,.pdf,.docx,.xlsx,.txt,.zip"/>
+        </label>
+        <div id="filePreview" class="full" style="display:none;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--r-md);font-size:13px;align-items:center;justify-content:space-between;gap:8px;">
+          <span>📎 <span id="fileName"></span></span>
+          <button type="button" id="btnClearFile" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:16px;">×</button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn ghost" id="btnCancelModal">Cancelar</button>
+        <button type="submit" class="btn primary" id="btnSubmitTicket">Criar chamado</button>
+      </div>
+      <p id="ticketError" class="error-text" style="margin-top:8px;text-align:right;"></p>
+    </form>
+  </div>
+</div>
+
+<script src="js/config.js?v=3"></script><script src="js/api.js?v=3"></script><script src="js/auth.js?v=3"></script><script src="js/tickets.js?v=3"></script>
+</body>
+</html>

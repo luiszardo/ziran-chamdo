@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Chamado · Ziran Desk</title>
+  <link rel="stylesheet" href="css/styles.css?v=3"/>
+</head>
+<body>
+<button class="hamburger" id="menuBtn">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <img src="assets/ziran-logo.jpg" alt="Ziran Desk"/>
+      <div><div class="sidebar-brand-name">Ziran Desk</div><div class="sidebar-brand-sub">Service desk corporativo</div></div>
+    </div>
+    <span class="nav-label">Principal</span>
+    <a href="dashboard.html" class="nav-link" data-staff-only><span class="nav-icon">📊</span> Dashboard</a>
+    <a href="tickets.html"   class="nav-link active"><span class="nav-icon">🎫</span> Chamados</a>
+    <span class="nav-label" data-admin-only>Administração</span>
+    <a href="admin.html" class="nav-link" data-admin-only><span class="nav-icon">⚙️</span> Configurações</a>
+    <div class="sidebar-footer">
+      <div class="user-pill">
+        <div class="user-avatar">?</div>
+        <div><div class="user-pill-name" id="welcomeUser">—</div><div class="user-pill-role" id="welcomeMeta">—</div></div>
+      </div>
+      <button class="logout-btn" id="logoutBtn">↪ Sair da conta</button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="readonly-notice gestor-notice" style="display:none;">
+      👁️ Perfil Gestor — visualização completa. Você pode comentar, mas não alterar status.
+    </div>
+
+    <!-- Header -->
+    <div class="page-header fade-up">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+          <a href="tickets.html" style="font-size:13px;color:var(--muted);font-weight:600;">← Chamados</a>
+          <span style="color:var(--muted-2);">/</span>
+          <span class="proto" id="breadProtocolo">—</span>
+          <span id="hdrStatus"></span>
+          <span id="hdrPrioridade"></span>
+        </div>
+        <h1 id="hdrTitulo" style="font-size:22px;">Carregando...</h1>
+      </div>
+      <div class="page-header-actions" data-editor-only>
+        <button class="btn ghost sm" id="btnStatus">🔄 Alterar status</button>
+        <button class="btn secondary sm" id="btnAssign">👤 Atribuir</button>
+        <button class="btn primary sm"   id="btnResolve">✅ Resolver</button>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="grid-detail">
+      <div class="card"><div class="skel" style="height:16px;width:40%;margin-bottom:16px;"></div><div class="skel" style="height:12px;margin-bottom:10px;"></div><div class="skel" style="height:12px;width:80%;"></div></div>
+      <div class="card"><div class="skel" style="height:80px;margin-bottom:12px;"></div><div class="skel" style="height:80px;"></div></div>
+    </div>
+
+    <!-- Detail content -->
+    <div id="detailContent" class="grid-detail" style="display:none;">
+
+      <!-- Left: Meta + Actions -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card fade-up">
+          <div class="section-row" style="margin-bottom:0;"><h3>Informações</h3></div>
+          <hr class="divider"/>
+          <div class="detail-list" id="metaList"></div>
+        </div>
+
+        <div class="card fade-up fade-up-1" id="attachCard" style="display:none;">
+          <div class="section-row"><h3>📎 Anexos</h3></div>
+          <div id="attachList" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+
+        <div class="card fade-up fade-up-2" data-editor-only>
+          <div class="section-row"><h3>⚡ Ações</h3></div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <button class="btn secondary sm" id="btnStatus2">🔄 Alterar status</button>
+            <button class="btn secondary sm" id="btnAssign2">👤 Atribuir técnico</button>
+            <button class="btn primary sm"   id="btnResolve2">✅ Marcar como resolvido</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Description + Timeline + Reply -->
+      <div style="display:flex;flex-direction:column;gap:16px;">
+        <div class="card fade-up">
+          <div class="section-row"><h3>📋 Descrição</h3><span style="font-size:12px;color:var(--muted);" id="openedAt">—</span></div>
+          <p id="ticketDesc" style="font-size:14px;color:var(--text-2);line-height:1.7;white-space:pre-wrap;">—</p>
+        </div>
+
+        <div class="card fade-up fade-up-1">
+          <div class="section-row">
+            <div><h3>💬 Histórico</h3></div>
+            <span style="font-size:12px;color:var(--muted);" id="intCount">0 interações</span>
+          </div>
+          <div class="timeline" id="timeline"></div>
+        </div>
+
+        <div class="card fade-up fade-up-2" id="replyCard">
+          <div class="section-row">
+            <h3>✍️ Responder</h3>
+            <div data-editor-only style="display:flex;gap:6px;">
+              <button class="btn xs" id="visPublic"   style="background:#dbeafe;color:#1e40af;border-color:#bfdbfe;">Público</button>
+              <button class="btn xs ghost" id="visInternal">Interno</button>
+            </div>
+          </div>
+          <form id="replyForm" novalidate>
+            <textarea id="replyMsg" rows="4" placeholder="Digite sua resposta..." required style="margin-bottom:12px;"></textarea>
+            <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <label class="btn ghost sm" style="cursor:pointer;margin-bottom:0;">📎 Anexar<input type="file" id="replyFile" style="display:none;"/></label>
+                <span id="replyFileName" style="font-size:12px;color:var(--muted);"></span>
+              </div>
+              <button type="submit" class="btn primary" id="btnSendReply">Enviar</button>
+            </div>
+            <p id="replyError" class="error-text" style="margin-top:8px;"></p>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Status Modal -->
+<div class="modal" id="statusModal">
+  <div class="modal-card" style="max-width:440px;">
+    <div class="modal-header"><h3>🔄 Alterar Status</h3><button class="modal-close" onclick="document.getElementById('statusModal').classList.remove('open')">×</button></div>
+    <div class="form-stack">
+      <label>Novo status<select id="statusSelect" class="form-control"></select></label>
+      <label>Comentário (opcional)<textarea id="statusComment" class="form-control" rows="3" placeholder="Motivo da alteração..."></textarea></label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="document.getElementById('statusModal').classList.remove('open')">Cancelar</button>
+      <button class="btn primary" id="saveStatusBtn">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Assign Modal -->
+<div class="modal" id="assignModal">
+  <div class="modal-card" style="max-width:440px;">
+    <div class="modal-header"><h3>👤 Atribuir Técnico</h3><button class="modal-close" onclick="document.getElementById('assignModal').classList.remove('open')">×</button></div>
+    <label class="form-control" style="padding:0;border:none;">Técnico responsável
+      <select id="assignSelect" class="form-control"><option value="">Sem atribuição</option></select>
+    </label>
+    <div class="modal-footer">
+      <button class="btn ghost" onclick="document.getElementById('assignModal').classList.remove('open')">Cancelar</button>
+      <button class="btn primary" id="saveAssignBtn">Atribuir</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js?v=3"></script><script src="js/api.js?v=3"></script><script src="js/auth.js?v=3"></script><script src="js/ticket-detail.js?v=3"></script>
+</body>
+</html>
